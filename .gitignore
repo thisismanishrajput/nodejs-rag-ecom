@@ -1,0 +1,29 @@
+# 💾 Node modules (dependency directory)
+node_modules/
+
+# 🔐 Environment variables
+.env
+
+# 💡 Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🧪 Test coverage
+coverage/
+
+# 💻 OS/System files
+.DS_Store
+Thumbs.db
+
+# 🛠 IDE/editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 🚫 Compiled build artifacts (if any in future)
+dist/
+build/

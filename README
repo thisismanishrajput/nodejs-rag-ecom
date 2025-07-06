@@ -1,0 +1,420 @@
+# 🧠 AI-Enhanced E-commerce Backend (Node.js + Python RAG Microservice)
+
+A Node.js backend for managing products and categories in an e-commerce system, featuring **AI-powered product search** using a **Python-based RAG (Retrieval-Augmented Generation) microservice** with support for **OpenAI, Gemini, and HuggingFace**.
+
+## 📦 Tech Stack
+
+- **Node.js + Express** - API handling and server framework
+- **MongoDB + Mongoose** - Database and ODM
+- **Python (Flask)** - AI microservice for intelligent search
+- **ChromaDB** - Vector database for semantic search
+- **LLMs Integration** - OpenAI GPT, Gemini, HuggingFace via HTTP calls
+- **Axios** - HTTP client for microservice communication
+- **CORS-enabled** - Frontend integration ready
+
+## 🗂️ Project Structure
+
+```
+ecommerce-backend/
+│
+├── app.js                      # Entry point, connects MongoDB and starts server
+├── routes/
+│   ├── categoryRoutes.js       # Routes for category management
+│   └── productRoutes.js        # Routes for product management + AI search
+│
+├── controllers/
+│   ├── categoryController.js   # Logic to handle categories
+│   └── productController.js    # Logic for products and AI search
+│
+├── models/
+│   ├── Category.js             # Mongoose schema for category
+│   └── Product.js              # Mongoose schema for product
+│
+├── .env                        # Environment variables (not committed)
+├── package.json                # NPM dependencies
+├── .gitignore                  # Git exclusions
+└── README.md                   # Documentation
+```
+
+## 🌐 API Endpoints
+
+### 🔹 Category Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/categories` | Add a new category |
+| `GET` | `/api/categories` | Get all categories |
+
+### 🔹 Product Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/products` | Add a new product |
+| `GET` | `/api/products` | Get all products (with category names) |
+| `POST` | `/api/products/ai-search` | 🔍 AI-powered semantic search |
+
+## 🧠 AI Product Search Architecture
+
+This backend integrates with an external **Flask-based Python RAG system** running on `http://localhost:5050` to provide intelligent product search capabilities.
+
+### ⚡ How It Works
+
+1. **Client Request**: Sends POST to `/api/products/ai-search`
+   ```json
+   {
+     "query": "facewash for men",
+     "agent": "openai"
+   }
+   ```
+
+2. **Microservice Call**: Node.js backend calls Python RAG service
+   ```http
+   POST http://localhost:5050/search
+   Content-Type: application/json
+   
+   {
+     "query": "facewash for men",
+     "agent": "openai"
+   }
+   ```
+
+3. **AI Processing**: Python service returns:
+   - `products` - Filtered and embedded matched products
+   - `ai_response` - Reasoned explanation from LLM
+   - `agent_used` - Which AI agent processed the query
+
+4. **Response**: Backend forwards the AI-enhanced response to frontend
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- MongoDB (running locally or cloud)
+- Python RAG microservice (see setup below)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/ecommerce-backend.git
+cd ecommerce-backend
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```env
+PORT=3000
+MONGO_URI=mongodb://localhost:27017/ecommerce-ai
+```
+
+### 4. Start the Server
+
+```bash
+node app.js
+```
+
+Your backend will be live at `http://localhost:3000`
+
+## 🧠 Python RAG Microservice Setup
+
+To enable AI-powered search capabilities, you need to set up the Python RAG microservice:
+
+### 1. Clone the Python RAG Repository
+
+```bash
+git clone https://github.com/your-username/python-rag.git
+cd python-rag
+```
+
+### 2. Setup Python Environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 3. Configure Python Environment
+
+Create `.env` file in the Python RAG directory:
+
+```env
+MONGO_URI=mongodb://localhost:27017/ecommerce-ai
+OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
+HF_TOKEN=your_huggingface_token
+```
+
+### 4. Start Python RAG Service
+
+```bash
+python app.py
+```
+
+The Python service will run on `http://localhost:5050`
+
+### 5. Sync Products for AI Search
+
+```bash
+curl -X POST http://localhost:5050/sync
+```
+
+## 🧪 API Usage Examples
+
+### Add a Category
+
+```bash
+curl -X POST http://localhost:3000/api/categories \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Skincare",
+  "description": "Beauty and skincare products"
+}'
+```
+
+### Add a Product
+
+```bash
+curl -X POST http://localhost:3000/api/products \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Nivea Men Face Wash",
+  "brand": "Nivea",
+  "price": 299,
+  "category": "CATEGORY_ID_HERE",
+  "description": "Deep cleansing face wash for men",
+  "tags": ["men", "facewash", "skincare"]
+}'
+```
+
+### AI-Powered Product Search
+
+```bash
+curl -X POST http://localhost:3000/api/products/ai-search \
+-H "Content-Type: application/json" \
+-d '{
+  "query": "Show me deodorants for men",
+  "agent": "huggingface"
+}'
+```
+
+**Response:**
+```json
+{
+  "products": [
+    {
+      "id": "...",
+      "name": "Nivea Fresh Active Deodorant",
+      "brand": "Nivea",
+      "price": 180,
+      "category": "Personal Care",
+      "description": "Long-lasting freshness for active men",
+      "tags": ["men", "deodorant", "fresh"]
+    }
+  ],
+  "ai_response": "We found some relevant items like Nivea Fresh Active Deodorant that matches your search for men's deodorants.",
+  "agent_used": "huggingface"
+}
+```
+
+## 🔧 Available AI Agents
+
+| Agent | Description | Use Case |
+|-------|-------------|----------|
+| `openai` | OpenAI GPT models | High-quality responses, complex queries |
+| `gemini` | Google Gemini 1.5 Flash | Fast responses, good reasoning |
+| `huggingface` | HuggingFace models (Qwen) | Open-source, customizable |
+
+## 📊 Database Schema
+
+### Category Schema
+```javascript
+{
+  name: String (required),
+  description: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Product Schema
+```javascript
+{
+  name: String (required),
+  brand: String,
+  price: Number (required),
+  category: ObjectId (ref: 'Category'),
+  description: String,
+  tags: [String],
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+## 🔍 Search Capabilities
+
+### Traditional Search
+- Filter by category, brand, price range
+- Text search in product names and descriptions
+- Tag-based filtering
+
+### AI-Powered Search
+- **Semantic Understanding**: "moisturizer for dry skin" → finds relevant products
+- **Natural Language**: "something for oily face" → understands intent
+- **Contextual Recommendations**: AI explains why products match the query
+- **Multi-language Support**: Query in different languages
+
+## 🏗️ System Architecture
+
+```
+Frontend → Node.js API → MongoDB (Traditional Search)
+                     ↓
+                   Python RAG Service → ChromaDB (Vector Search)
+                                   ↓
+                                 LLM Agents (OpenAI/Gemini/HuggingFace)
+```
+
+## 🚀 Performance Optimizations
+
+- **Microservice Architecture**: Separate AI processing from main API
+- **Database Indexing**: Optimized MongoDB queries
+- **Caching**: Vector embeddings cached in ChromaDB
+- **Connection Pooling**: Efficient database connections
+- **Error Handling**: Graceful fallbacks when AI service is unavailable
+
+## 🔐 Security Considerations
+
+- **Environment Variables**: API keys stored securely
+- **CORS Configuration**: Controlled frontend access
+- **Input Validation**: Sanitized user inputs
+- **Rate Limiting**: Prevent API abuse (recommended)
+
+## 📦 Dependencies
+
+### Node.js Dependencies
+```json
+{
+  "express": "^4.18.0",
+  "mongoose": "^7.0.0",
+  "cors": "^2.8.5",
+  "dotenv": "^16.0.0",
+  "axios": "^1.4.0"
+}
+```
+
+### Python RAG Dependencies
+- `flask` - Web framework
+- `chromadb` - Vector database
+- `sentence-transformers` - Embeddings
+- `openai` - OpenAI API
+- `google-generativeai` - Gemini API
+
+## 🔮 Future Enhancements
+
+- 📊 **Analytics Dashboard**: Search analytics and product insights
+- 🔐 **Authentication**: User management and JWT tokens
+- 📱 **Mobile API**: React Native or Flutter integration
+- 🧾 **CSV Upload**: Bulk product import functionality
+- 🚀 **Caching Layer**: Redis for improved performance
+- 📄 **Documentation**: OpenAPI/Swagger integration
+- 🔍 **Advanced Filters**: Price range, availability, ratings
+- 🛒 **Shopping Cart**: Order management system
+
+## 🧪 Testing
+
+```bash
+# Install test dependencies
+npm install --save-dev jest supertest
+
+# Run tests
+npm test
+```
+
+## 📋 Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `PORT` | Server port (default: 3000) | ✅ |
+| `MONGO_URI` | MongoDB connection string | ✅ |
+| `PYTHON_RAG_URL` | Python RAG service URL | ⚠️ (default: localhost:5050) |
+
+## 🛑 .gitignore
+
+```gitignore
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+```
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **MongoDB Connection Failed**
+   - Ensure MongoDB is running
+   - Check connection string in `.env`
+
+2. **Python RAG Service Unavailable**
+   - Verify Python service is running on port 5050
+   - Check if products are synced (`/sync` endpoint)
+
+3. **AI Search Not Working**
+   - Verify API keys in Python service `.env`
+   - Check if ChromaDB is properly initialized
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Flask + ChromaDB** - AI microservice foundation
+- **MongoDB + Mongoose** - Database layer
+- **OpenAI, Google Gemini, HuggingFace** - LLM integrations
+- **Express.js** - Web framework
+
+---
+
+⭐ **Star this repo** if you find it helpful!
+
+📧 **Questions?** Open an issue or reach out to the maintainers.
