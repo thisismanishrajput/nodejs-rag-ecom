@@ -133,3 +133,4 @@ curl -X POST http://localhost:3000/api/products/sync
 ---
 
 **Need more details?** Check `COMPREHENSIVE_SYSTEM_DOCUMENTATION.md` for complete technical documentation! 📚
+

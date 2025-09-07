@@ -301,3 +301,4 @@ curl -X POST http://localhost:3000/api/products/debug-search \
 ```
 
 This enhanced Node.js backend now provides full integration with your Python RAG system, including pagination, filtering, comprehensive error handling, and automatic synchronization!
+
